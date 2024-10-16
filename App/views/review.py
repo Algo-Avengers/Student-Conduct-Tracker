@@ -1,9 +1,8 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from App.controllers.review import review_to_json
-from App.controllers import Review, Student, Staff
+from App.controllers import review, Student, staff
 from App.database import db
-from App.views.review import add_review, view_student_reviews
 
 review_views = Blueprint('review_views', __name__)
 
@@ -18,7 +17,7 @@ def create_review():
     comment = data.get('comment')
     if not student_id or not review_type or not course or not comment:
         return jsonify({"error": "Student ID, type, course, and comment are required"}), 400
-    new_review = Review(
+    new_review = review(
         student_id=student_id,
         staff_id=staff_id,
         type=review_type,
@@ -32,7 +31,7 @@ def create_review():
 @review_views.route('/api/review/student/<int:student_id>', methods=['GET'])
 @jwt_required()
 def get_student_reviews(student_id):
-    reviews = Review.query.filter_by(student_id=student_id).all()
+    reviews = review.query.filter_by(student_id=student_id).all()
     if not reviews:
         return jsonify({"error": "No reviews found for this student"}), 404
     reviews_list = [review_to_json(review) for review in reviews]
@@ -41,7 +40,7 @@ def get_student_reviews(student_id):
 @review_views.route('/api/review/<int:id>', methods=['GET'])
 @jwt_required()
 def get_review(id):
-    review = Review.query.get(id)
+    review = review.query.get(id)
     if not review:
         return jsonify({"error": "Review not found"}), 404
     return jsonify(review_to_json(review)), 200
@@ -55,7 +54,7 @@ def update_review(id):
     comment = data.get('comment')
     if not review_type or not course or not comment:
         return jsonify({"error": "Type, course, and comment are required"}), 400
-    review = Review.query.get(id)
+    review = review.query.get(id)
     if not review:
         return jsonify({"error": "Review not found"}), 404
     review.type = review_type
@@ -67,7 +66,7 @@ def update_review(id):
 @review_views.route('/api/review/<int:id>', methods=['DELETE'])
 @jwt_required()
 def delete_review(id):
-    review = Review.query.get(id)
+    review = review.query.get(id)
     if not review:
         return jsonify({"error": "Review not found"}), 404
     db.session.delete(review)

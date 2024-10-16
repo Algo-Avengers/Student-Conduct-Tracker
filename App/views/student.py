@@ -2,7 +2,6 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from App.controllers import student
 from App.database import db
-from App.views.student import search_student, add_student
 
 student_views = Blueprint('student_views', __name__)
 
@@ -28,7 +27,7 @@ def create_student():
     student_name = data.get('name')
     if not student_id or not student_name:
         return jsonify({"error": "Student ID and name required"}), 400
-    result = add_student(student_id, student_name)
+    result = student.add_student(student_id, student_name)
     return jsonify(result), 201 if "successfully" in result["message"] else 400
 
 @student_views.route('/api/student/<int:id>', methods=['PUT'])

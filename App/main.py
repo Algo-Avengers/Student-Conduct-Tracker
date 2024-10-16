@@ -4,8 +4,6 @@ from flask_uploads import DOCUMENTS, IMAGES, TEXT, UploadSet, configure_uploads
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import  FileStorage
-
-
 from App.database import init_db
 from App.config import load_config
 
@@ -23,18 +21,25 @@ def add_views(app):
 
 def create_app(overrides={}):
     app = Flask(__name__, static_url_path='/static')
+    init_db(app)
     load_config(app, overrides)
     CORS(app)
     add_auth_context(app)
     photos = UploadSet('photos', TEXT + DOCUMENTS + IMAGES)
     configure_uploads(app, photos)
     add_views(app)
-    init_db(app)
+    
     jwt = setup_jwt(app)
     setup_admin(app)
     @jwt.invalid_token_loader
+    def custom_invalid_token_response(error):
+        return render_template('401.html', error=error), 401
+
     @jwt.unauthorized_loader
     def custom_unauthorized_response(error):
         return render_template('401.html', error=error), 401
-    app.app_context().push()
+
     return app
+    
+    
+

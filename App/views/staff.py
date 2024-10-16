@@ -1,9 +1,9 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from App.controllers import user, review, student
+from App.controllers import review, student
 from App.database import db
 
-from App.controllers.user import (
+from App.controllers.staff import (
     create_user, get_user_by_username, get_user, get_all_users, get_all_users_json, update_user, toJSON
 )
 
